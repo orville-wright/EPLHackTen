@@ -10,8 +10,8 @@ import (
 	"net/url"
 	"os"
 
-	"github.com/orville-wright/eplhack/eplstuff"
-	"github.com/orville-wright/eplhack/mylogger"
+	"github.com/orville-wright/EPLHackTen/eplstuff"
+	"github.com/orville-wright/EPLHackTen/mylogger"
 )
 
 /*

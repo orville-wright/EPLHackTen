@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/orville-wright/eplhack/mylogger"
+	"github.com/orville-wright/EPLHackTen/mylogger"
 )
 
 // Hack10 does some EPL API tests
