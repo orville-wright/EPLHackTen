@@ -20,7 +20,7 @@ func Hack10() {
 	loginURL := "https://ois-orinda-ca.schoolloop.com/portal/login?etarget=login_form"
 	urlData := url.Values{}
 	urlData.Set("login_name", username)
-	urlData.Set("password", badpassword)
+	urlData.Set("password", password)
 	mylogger.Info.Print("*** #10.1 : URL: ", loginURL)
 	mylogger.Info.Printf("*** #10.2 : username / password: %s / %s", username, password)
 	mylogger.Info.Print("*** #10.3 : POST now")
