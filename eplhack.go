@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"flag"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -33,19 +34,19 @@ func processElement(index int, element *goquery.Selection) {
 
 // Hack #1
 
-func hack1() {
+func hack1(u string, p string) {
 	// XXXX
 	log.Print("===================================")
 	log.Print("*** #1.0 starting...")
-	login_name := "badusername"
-	password := "badpassword"
+	loginName := u //username
+	password := p  //password
 	loginURL := "https://ois-orinda-ca.schoolloop.com/portal/login?etarget=login_form"
 	//loginURL := "https://ois-orinda-ca.schoolloop.com/portal/login"
 	urlData := url.Values{}
-	urlData.Set("login_name", login_name)
+	urlData.Set("login_name", loginName)
 	urlData.Set("password", password)
 	log.Print("*** #1.1 : URL: ", loginURL)
-	log.Printf("*** #1.2 : username / password: %s / %s", login_name, password)
+	log.Printf("*** #1.2 : username / password: %s / %s", loginName, password)
 	log.Print("*** #1.3 : POSTform now")
 	resp4, err := http.PostForm(loginURL, urlData)
 	//resp4, err := http.Post(loginURL, "text/html", urlData)
@@ -83,6 +84,7 @@ func hack1() {
 // end hack1
 
 func hack2() {
+	// no username/password required. Just a GET request going on here...
 	log.Printf("\n===================================")
 	log.Print("*** HACK #2 starting...")
 
@@ -118,7 +120,8 @@ func hack2() {
 
 // end hack2
 
-func hack3() {
+func hack3(u string, p string) {
+	// Required:  username/passowrd
 	log.Printf("\n===================================")
 	log.Print("***  HACK 3.0 starting...")
 	log.Print("*** #3.1 init empty GET client/Req...")
@@ -126,7 +129,7 @@ func hack3() {
 	client2 := http.Client{}
 	//request2, err := http.NewRequest("POST", "https://ois-orinda-ca.schoolloop.com/portal/login", nil)
 	request2, err := http.NewRequest("POST", "https://ois-orinda-ca.schoolloop.com/portal/login?etarget=login_form", nil)
-	request2.SetBasicAuth("badusername", "badpassowrd")
+	request2.SetBasicAuth(u, p)
 
 	resp2, err := client2.Do(request2) //POST
 	mylogger.Info.Printf("*** #3.2 do manual POST - using URL: %s", resp2.Request.URL)
@@ -180,6 +183,7 @@ func hack3() {
 // end hack3
 
 func hack4() {
+	// no username/password used here. Just a GET happening...
 	log.Printf("\n===================================")
 	log.Print("*** HACK #4 starting...")
 	log.Print("*** #4.0 init empty GET client/Req...")
@@ -203,8 +207,26 @@ func hack4() {
 
 func main() {
 	mylogger.Init(ioutil.Discard, os.Stdout, os.Stdout, os.Stderr)
-
 	mylogger.Info.Println("*** In main()")
+	log.Printf("\n===================================")
+	log.Print("*** #0.0 Debug logging initalized ...")
+	// CMD Line args processing
+	usernamePtr := flag.String("username", "anonymous", "Username to log in as")
+	passwordPtr := flag.String("password", "badpassword", "Password credentials")
+	debugPtr := flag.Bool("debugon", false, "Enable **INFO level debug output")
+	//numbPtr := flag.Int("numb", 42, "NUMB an int")
+	//var svar string
+	//flag.StringVar(&svar, "svar", "bar", "SVAR a string var")
+	flag.Parse()
+
+	log.Printf("\n===================================")
+	log.Print("*** #0.1 CMD Line args[]...")
+	fmt.Println("Username:", *usernamePtr)
+	fmt.Println("Password:", *passwordPtr)
+	fmt.Println("Debug status:", *debugPtr)
+	//fmt.Println("svar:", svar)
+	fmt.Println("tail:", flag.Args())
+
 	/*
 		options := cookiejar.Options{
 			PublicSuffixList: publicsuffix.List,
@@ -215,14 +237,14 @@ func main() {
 		}
 	*/
 	// client := http.Client{Jar: jar}
-	hack1()
+	hack1(*usernamePtr, *passwordPtr)
 	hack2()
-	hack3()
+	hack3(*usernamePtr, *passwordPtr)
 	hack4()
 
-	eplstuff.Hack10()
+	eplstuff.Hack10(*usernamePtr, *passwordPtr)
 	eplstuff.Hack20()
-	eplstuff.Hack30()
+	eplstuff.Hack30(*usernamePtr, *passwordPtr)
 	eplstuff.Hack40()
 
 }

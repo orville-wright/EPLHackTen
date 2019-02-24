@@ -11,12 +11,12 @@ import (
 )
 
 // Hack10 does some EPL API tests
-func Hack10() {
-	// Hack10
+func Hack10(u string, p string) {
+	// REquired: username/password
 	mylogger.Info.Printf("\n===================================")
 	mylogger.Info.Print("*** HACK #10.0 starting...")
-	username := "badusername"
-	password := "badpassword"
+	username := u
+	password := p
 	loginURL := "https://ois-orinda-ca.schoolloop.com/portal/login?etarget=login_form"
 	urlData := url.Values{}
 	urlData.Set("login_name", username)
@@ -53,6 +53,7 @@ func Hack10() {
 
 // Hack20 does some more EPL API tests
 func Hack20() {
+	//no username/password needed here
 	mylogger.Info.Printf("\n===================================")
 	mylogger.Info.Print("*** HACK #20.0 starting...")
 
@@ -81,7 +82,7 @@ func Hack20() {
 // end hack2
 
 // Hack30 does even more EPL API testing
-func Hack30() {
+func Hack30(u string, p string) {
 	mylogger.Info.Printf("\n===================================")
 	mylogger.Info.Print("*** HACK #30.0 starting...")
 	mylogger.Info.Print("*** #30.1 init empty GET client/Req...")
@@ -89,7 +90,7 @@ func Hack30() {
 	client2 := http.Client{}
 	//request2, err := http.NewRequest("POST", "https://ois-orinda-ca.schoolloop.com/portal/login", nil)
 	request2, err := http.NewRequest("POST", "https://ois-orinda-ca.schoolloop.com/portal/login?etarget=login_form", nil)
-	request2.SetBasicAuth("badusername", "badpassword")
+	request2.SetBasicAuth(u, p)
 
 	resp2, err := client2.Do(request2) //POST
 	//Info.Printf("*** #3.2 do manual POST - using URL: %s", resp2.Request.URL)
@@ -111,7 +112,7 @@ func Hack30() {
 	}
 
 	mylogger.Info.Println("*** #30.8 set auth creds for 2nd POST for req2 ...") //#bug this now needs to be a GET!!
-	request2.SetBasicAuth("badusername", "badpassword")
+	request2.SetBasicAuth(u, p)
 	resp2, err = client2.Do(request2)
 	mylogger.Info.Printf("*** #30.9 2nd GET resp2 from orig POST URL: %s", resp2.Request.URL)
 	mylogger.Info.Println("*** #30.10 resp2 2nd GET Status...", resp2.Status)
@@ -146,6 +147,7 @@ func Hack30() {
 
 // Hack40 does even more crazy EPL API testing
 func Hack40() {
+	//no username/password levergaed here
 	mylogger.Info.Printf("\n===================================")
 	mylogger.Info.Print("*** HACK #40.0 starting...")
 	mylogger.Info.Print("*** #40.1 init empty GET client/Req...")
