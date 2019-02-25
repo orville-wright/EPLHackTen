@@ -211,8 +211,8 @@ func main() {
 	log.Printf("\n===================================")
 	log.Print("*** #0.0 Debug logging initalized ...")
 	// CMD Line args processing
-	usernamePtr := flag.String("username", "anonymous", "Username to log in as")
-	passwordPtr := flag.String("password", "badpassword", "Password credentials")
+	usernamePtr := flag.String("username", "no_username", "Username to log in as")
+	passwordPtr := flag.String("password", "no_password", "Password credentials")
 	debugPtr := flag.Bool("debugon", false, "Enable **INFO level debug output")
 	//numbPtr := flag.Int("numb", 42, "NUMB an int")
 	//var svar string
@@ -221,11 +221,38 @@ func main() {
 
 	log.Printf("\n===================================")
 	log.Print("*** #0.1 CMD Line args[]...")
-	fmt.Println("Username:", *usernamePtr)
+		fmt.Println("Username:", *usernamePtr)
 	fmt.Println("Password:", *passwordPtr)
 	fmt.Println("Debug status:", *debugPtr)
-	//fmt.Println("svar:", svar)
+	fmt.Println("Args - raw string passed:", os.Args[1:])
 	fmt.Println("tail:", flag.Args())
+	t1 := *usernamePtr
+	t2 := *passwordPtr
+	switch {			//switch TRUE
+		// do not test on 1 specioifc condition. Evaluate multiple Arg V cases
+		case t1 == "no_username":
+			log.Printf("\n===================================")
+			log.Print("No username provided !!")
+		case t2 == "no_password":
+			log.Printf("\n===================================")
+			log.Print("No passwpord provided !!")
+		default:
+			// safe to execute main() app as Args satisfied
+			log.Print("username & password provided. Executing...")
+			hack1(*usernamePtr, *passwordPtr)
+			hack2()
+			hack3(*usernamePtr, *passwordPtr)
+			hack4()
+			eplstuff.Hack10(*usernamePtr, *passwordPtr)
+			eplstuff.Hack20()
+			eplstuff.Hack30(*usernamePtr, *passwordPtr)
+			eplstuff.Hack40()
+		}
+
+// end to main. Exit
+}
+	//fmt.Println("svar:", svar)
+
 
 	/*
 		options := cookiejar.Options{
@@ -237,17 +264,6 @@ func main() {
 		}
 	*/
 	// client := http.Client{Jar: jar}
-	hack1(*usernamePtr, *passwordPtr)
-	hack2()
-	hack3(*usernamePtr, *passwordPtr)
-	hack4()
-
-	eplstuff.Hack10(*usernamePtr, *passwordPtr)
-	eplstuff.Hack20()
-	eplstuff.Hack30(*usernamePtr, *passwordPtr)
-	eplstuff.Hack40()
-
-}
 
 /*
 	log.Print("Set url.Values array...")
