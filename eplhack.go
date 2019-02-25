@@ -230,12 +230,19 @@ func main() {
 	t2 := *passwordPtr
 	switch {			//switch TRUE
 		// do not test on 1 specioifc condition. Evaluate multiple Arg V cases
+		// this logic is not graceful, but it catches all bade permutations
 		case t1 == "no_username":
 			log.Printf("\n===================================")
-			log.Print("No username provided !!")
+			log.Print("No Username provided !!")
+			fallthrough		// check password also
+		case t1 == "":
+			log.Print("Username cannot be BLANK/Empty !!")
+			fallthrough		// check password also
 		case t2 == "no_password":
-			log.Printf("\n===================================")
-			log.Print("No passwpord provided !!")
+			log.Print("No password provided !!")
+			fallthrough
+		case t2 == "":
+				log.Print("Password cannot be BLANK/Empty !!")
 		default:
 			// safe to execute main() app as Args satisfied
 			log.Print("username & password provided. Executing...")
