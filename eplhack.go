@@ -205,6 +205,18 @@ func hack4() {
 
 }
 
+// BadargvCheck safer Argv checking
+func BadargvCheck(bargv string) bool {
+// Returns:
+	switch bargv {
+	case "", " ", "no_username", "no_password":
+		log.Print("Argv looks bad...")
+		return true
+	}
+	log.Print("Credentials seem o.k.")
+	return false
+}
+
 func main() {
 	mylogger.Init(ioutil.Discard, os.Stdout, os.Stdout, os.Stderr)
 	mylogger.Info.Println("*** In main()")
@@ -221,13 +233,64 @@ func main() {
 
 	log.Printf("\n===================================")
 	log.Print("*** #0.1 CMD Line args[]...")
-		fmt.Println("Username:", *usernamePtr)
+	fmt.Println("Username:", *usernamePtr)
 	fmt.Println("Password:", *passwordPtr)
 	fmt.Println("Debug status:", *debugPtr)
 	fmt.Println("Args - raw string passed:", os.Args[1:])
 	fmt.Println("tail:", flag.Args())
-	t1 := *usernamePtr
-	t2 := *passwordPtr
+	// t1 := *usernamePtr
+	// t2 := *passwordPtr
+
+var argvarray [2]string
+argvarray[0] = *usernamePtr
+argvarray[1] = *passwordPtr
+
+Loop:
+for x, argvloop := range argvarray {
+	log.Printf("Looping: %v arg: %s", x, argvarray)
+	switch BadargvCheck(argvloop) {
+	case true:	// bad
+		log.Print("Bad Username/Password values!!")
+		break Loop
+	case false:		// good
+		log.Print("username/password credentials provided. Executing...")
+		hack1(*usernamePtr, *passwordPtr)
+		hack2()
+		hack3(*usernamePtr, *passwordPtr)
+		hack4()
+		eplstuff.Hack10(*usernamePtr, *passwordPtr)
+		eplstuff.Hack20()
+		eplstuff.Hack30(*usernamePtr, *passwordPtr)
+		eplstuff.Hack40()
+	default:		// ??
+		log.Print("Something weird happend with ArgV. Exiting!")
+	}
+
+}
+
+/*
+switch {		// TRUE
+		case BadargvCheck(*usernamePtr):
+				log.Print("Bad Username value!!")
+				fallthrough
+		case BadargvCheck(*passwordPtr):
+				log.Print("Bad password value!!")
+		default:
+			// safe to exec main()...
+			log.Print("username & password credential are good. Executing...")
+			hack1(*usernamePtr, *passwordPtr)
+			hack2()
+			hack3(*usernamePtr, *passwordPtr)
+			hack4()
+			eplstuff.Hack10(*usernamePtr, *passwordPtr)
+			eplstuff.Hack20()
+			eplstuff.Hack30(*usernamePtr, *passwordPtr)
+			eplstuff.Hack40()
+}
+
+*/
+
+/*
 	switch {			//switch TRUE
 		// do not test on 1 specioifc condition. Evaluate multiple Arg V cases
 		// this logic is not graceful, but it catches all bade permutations
@@ -245,20 +308,12 @@ func main() {
 				log.Print("Password cannot be BLANK/Empty !!")
 		default:
 			// safe to execute main() app as Args satisfied
-			log.Print("username & password provided. Executing...")
-			hack1(*usernamePtr, *passwordPtr)
-			hack2()
-			hack3(*usernamePtr, *passwordPtr)
-			hack4()
-			eplstuff.Hack10(*usernamePtr, *passwordPtr)
-			eplstuff.Hack20()
-			eplstuff.Hack30(*usernamePtr, *passwordPtr)
-			eplstuff.Hack40()
 		}
+*/
 
-// end to main. Exit
-}
-	//fmt.Println("svar:", svar)
+}		// end to main. Exit
+
+//fmt.Println("svar:", svar)
 
 
 	/*
