@@ -205,19 +205,11 @@ func hack4() {
 
 }
 
-// BadargvCheck safer Argv checking
-func BadargvCheck(bargv string) bool {
-// Returns:
-	switch bargv {
-	case "", " ", "no_username", "no_password":
-		log.Print("Argv looks bad...")
-		return true
-	}
-	log.Print("Credentials seem o.k.")
-	return false
-}
-
 func main() {
+	myastate := 99
+	myValue := &myastate
+	myptr := myValue
+
 	mylogger.Init(ioutil.Discard, os.Stdout, os.Stdout, os.Stderr)
 	mylogger.Info.Println("*** In main()")
 	log.Printf("\n===================================")
@@ -241,91 +233,71 @@ func main() {
 	// t1 := *usernamePtr
 	// t2 := *passwordPtr
 
-var argvarray [2]string
-argvarray[0] = *usernamePtr
-argvarray[1] = *passwordPtr
+	var argvarray [2]string
+	argvarray[0] = *usernamePtr
+	argvarray[1] = *passwordPtr
 
-Loop:
-for x, argvloop := range argvarray {
-	log.Printf("Looping: %v arg: %s", x, argvarray)
-	switch BadargvCheck(argvloop) {
-	case true:	// bad
-		log.Print("Bad Username/Password values!!")
-		break Loop
-	case false:		// good
-		log.Print("username/password credentials provided. Executing...")
-		hack1(*usernamePtr, *passwordPtr)
-		hack2()
-		hack3(*usernamePtr, *passwordPtr)
-		hack4()
-		eplstuff.Hack10(*usernamePtr, *passwordPtr)
-		eplstuff.Hack20()
-		eplstuff.Hack30(*usernamePtr, *passwordPtr)
-		eplstuff.Hack40()
-	default:		// ??
-		log.Print("Something weird happend with ArgV. Exiting!")
-	}
-
-}
-
-/*
-switch {		// TRUE
-		case BadargvCheck(*usernamePtr):
-				log.Print("Bad Username value!!")
-				fallthrough
-		case BadargvCheck(*passwordPtr):
-				log.Print("Bad password value!!")
-		default:
-			// safe to exec main()...
-			log.Print("username & password credential are good. Executing...")
-			hack1(*usernamePtr, *passwordPtr)
-			hack2()
-			hack3(*usernamePtr, *passwordPtr)
-			hack4()
-			eplstuff.Hack10(*usernamePtr, *passwordPtr)
-			eplstuff.Hack20()
-			eplstuff.Hack30(*usernamePtr, *passwordPtr)
-			eplstuff.Hack40()
-}
-
-*/
-
-/*
-	switch {			//switch TRUE
-		// do not test on 1 specioifc condition. Evaluate multiple Arg V cases
-		// this logic is not graceful, but it catches all bade permutations
-		case t1 == "no_username":
-			log.Printf("\n===================================")
-			log.Print("No Username provided !!")
-			fallthrough		// check password also
-		case t1 == "":
-			log.Print("Username cannot be BLANK/Empty !!")
-			fallthrough		// check password also
-		case t2 == "no_password":
-			log.Print("No password provided !!")
-			fallthrough
-		case t2 == "":
-				log.Print("Password cannot be BLANK/Empty !!")
-		default:
-			// safe to execute main() app as Args satisfied
-		}
-*/
-
-}		// end to main. Exit
+	//*myValue = x
+	for x, argvloop := range argvarray {
+		/* debug var checking...
+		log.Printf("Top of for loop...")
+		log.Printf("myptr: %v", myptr)
+		log.Printf("*myptr: %v", *myptr)
+		log.Printf("&myptr: %v", &myptr)
+		log.Printf("myValue: %v", myValue)
+		log.Printf("&myValue: %v", &myValue)
+		log.Printf("*myValue: %v", *myValue)
+		log.Printf("myastate: %v", myastate)
+		log.Printf("&myastate: %v", &myastate)
+		*/
+		log.Printf("Looping: %v arg: %s", x, argvarray[x])
+		switch argvloop {
+		case "", " ":
+			log.Printf("Argv %x looks bad (space or empty string): %s...", x, argvloop)
+			*myValue = 2 // bad argv state
+		case "no_username":
+			log.Printf("Argv %x looks bad (no username): %s...", x, argvloop)
+			*myValue = 3 // bad argv state
+		case "no_password":
+			log.Printf("Argv %x looks bad (no password): %s...", x, argvloop)
+			*myValue = 4 // bad argv state
+		default: // good-ish
+			log.Printf("In DEFAULT: %v...", x)
+			if x == 1 { // only go inside if for-loop has completed
+				if *myValue == 99 { // clean argv state
+					log.Printf("In DEFAULT & everything is good...")
+					// exec code here...
+					log.Printf("state ptr: %v state value: %v - username/password credentials provided. Executing...", *myptr, myastate)
+					hack1(*usernamePtr, *passwordPtr)
+					hack2()
+					hack3(*usernamePtr, *passwordPtr)
+					hack4()
+					eplstuff.Hack10(*usernamePtr, *passwordPtr)
+					eplstuff.Hack20()
+					eplstuff.Hack30(*usernamePtr, *passwordPtr)
+					eplstuff.Hack40()
+				} else {
+					log.Print("One of the Args was bad. NOT execing...")
+				}
+			} else {
+				log.Print("In DEFAULT but not finished looping yet...")
+			}
+		} // switch tests
+	} // outer FOR loop of switch tests
+} // end main()
 
 //fmt.Println("svar:", svar)
 
-
-	/*
-		options := cookiejar.Options{
-			PublicSuffixList: publicsuffix.List,
-		}
-		jar, err := cookiejar.New(&options)
-		if err != nil {
-			log.Fatal(err)
-		}
-	*/
-	// client := http.Client{Jar: jar}
+/*
+	options := cookiejar.Options{
+		PublicSuffixList: publicsuffix.List,
+	}
+	jar, err := cookiejar.New(&options)
+	if err != nil {
+		log.Fatal(err)
+	}
+*/
+// client := http.Client{Jar: jar}
 
 /*
 	log.Print("Set url.Values array...")
