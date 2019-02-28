@@ -14,6 +14,9 @@ import (
 	"github.com/orville-wright/EPLHackTen/mylogger"
 )
 
+// Globaldbug Global var for debug status testing
+var Globaldbug bool // default zero value = false
+
 /*
 func keepLines(s string, n int) string {
 	result := strings.Join(strings.Split(s, "\n")[:n], "\n")
@@ -35,9 +38,9 @@ func processElement(index int, element *goquery.Selection) {
 // Hack #1
 
 func hack1(u string, p string) {
-	// XXXX
-	log.Print("===================================")
-	log.Print("*** #1.0 starting...")
+	// hack1 basic http.POSTform with credentials passed in body
+	mylogger.Info.Printf("\n===================================")
+	mylogger.Info.Println("#1.0 starting basic http.PostForm...")
 	loginName := u //username
 	password := p  //password
 	loginURL := "https://ois-orinda-ca.schoolloop.com/portal/login?etarget=login_form"
@@ -45,39 +48,45 @@ func hack1(u string, p string) {
 	urlData := url.Values{}
 	urlData.Set("login_name", loginName)
 	urlData.Set("password", password)
-	log.Print("*** #1.1 : URL: ", loginURL)
-	log.Printf("*** #1.2 : username / password: %s / %s", loginName, password)
-	log.Print("*** #1.3 : POSTform now")
+	mylogger.Info.Println("#1.1 : URL: ", loginURL)
+	mylogger.Info.Printf("#1.2 : username / password: %s / %s", loginName, password)
+	if Globaldbug == true {
+		mylogger.Info.Println("#1.3 : Exec POSTform now")
+	}
 	resp4, err := http.PostForm(loginURL, urlData)
 	//resp4, err := http.Post(loginURL, "text/html", urlData)
-
-	mylogger.Info.Printf("*** #1.4 POSTform - using URL: %s", resp4.Request.URL)
-	mylogger.Info.Printf("*** #1.4 POSTform - using URLdata: %v", urlData)
-	mylogger.Info.Println("*** #1.5 POSTform - Status...", resp4.Status)
-	mylogger.Info.Println("*** #1.5 POSTform - req form values...", resp4.Request.Form)
+	if Globaldbug == true {
+		mylogger.Info.Println("#1.4 POSTform URL:", resp4.Request.URL)
+		mylogger.Info.Println("#1.4 POSTform URLdata:", urlData)
+		mylogger.Info.Println("#1.5 POSTform status:", resp4.Status)
+		mylogger.Info.Println("#1.5 POSTform data:", resp4.Request.Form)
+	}
 
 	if err != nil {
 		log.Fatal(err)
 	} else {
-		mylogger.Info.Println("*** #1.6 POSTform ERR Status resp4/auto-req ...", err)
+		if Globaldbug == true {
+			mylogger.Info.Println("#1.6 POSTform ERR Status:", err)
+			mylogger.Info.Println("#1.7 Resp status: ", resp4.Status)
+		}
 	}
 
-	fmt.Println("*** XXXX HACK #1 Resp status : ", resp4.Status)
 	//fmt.Println("Header: ", resp4.Header)
 	//fmt.Println("Body: ", resp4.Body)
-	fmt.Println("*** XXXX HACK #1 Resp Header values")
-	i := 1
-	for key, value := range resp4.Header {
-		fmt.Println(i, "-", key, ":", value)
-		i++
+	if Globaldbug == true {
+		mylogger.Info.Println("#1.8 Resp Header values")
+		i := 1
+		for key, value := range resp4.Header {
+			fmt.Println(i, "-", key, ":", value)
+			i++
+		}
+
+		mylogger.Info.Println("#1.9 Resp Cookies...")
+		for ckey, cookie := range resp4.Cookies() {
+			fmt.Println(ckey, ":", "Cookie:", cookie.Name, " ", cookie.Value)
+		}
 	}
 
-	log.Print("*** XXXX HACK #1 Resp Cookies...")
-	for ckey, cookie := range resp4.Cookies() {
-		fmt.Println(ckey, ":", "Cookie:", cookie.Name, " ", cookie.Value)
-	}
-
-	log.Print("*** XXXX HACK #1 stop...")
 	defer resp4.Body.Close()
 }
 
@@ -85,27 +94,27 @@ func hack1(u string, p string) {
 
 func hack2() {
 	// no username/password required. Just a GET request going on here...
-	log.Printf("\n===================================")
-	log.Print("*** HACK #2 starting...")
+	mylogger.Info.Printf("\n===================================")
+	mylogger.Info.Println("Test #2 starting...")
 
-	log.Print("*** #2.0 init empty GET client/Req...")
+	mylogger.Info.Println("#2.0 init basic vanilla GET client/Req...")
 	resp0, _ := http.Get("https://ois-orinda-ca.schoolloop.com/")
-	log.Printf("*** #2.1 Do GET on URL %s", resp0.Request.URL)
-	log.Printf("*** #2.2 Status: %s", resp0.Status)
+	mylogger.Info.Println("#2.1 Basic GET respponse URL: ", resp0.Request.URL)
+	mylogger.Info.Println("#2.2 Basic GET Status:", resp0.Status)
 	//Info.Println("*** XXX HACK #2 GET Headers...", resp0.Header)
+	if Globaldbug == true {
+		fmt.Println("#2.3 Resp Header values")
+		i := 1
+		for key, value := range resp0.Header {
+			fmt.Println(i, "-", key, ":", value)
+			i++
+		}
 
-	fmt.Println("*** #2.3 Resp Header values")
-	i := 1
-	for key, value := range resp0.Header {
-		fmt.Println(i, "-", key, ":", value)
-		i++
+		log.Print("#2.4 Resp Cookies...")
+		for ckey, cookie := range resp0.Cookies() {
+			fmt.Println(ckey, ":", "Cookie:", cookie.Name, " ", cookie.Value)
+		}
 	}
-
-	log.Print("*** #2.4 Resp Cookies...")
-	for ckey, cookie := range resp0.Cookies() {
-		fmt.Println(ckey, ":", "Cookie:", cookie.Name, " ", cookie.Value)
-	}
-
 	/*
 	   // move this out to its own package, when I'm ready to mess arround with goquery
 	   	log.Print("*** HACK #2 >>>GO-QUERY dump on resp.body doc<<<")
@@ -122,60 +131,70 @@ func hack2() {
 
 func hack3(u string, p string) {
 	// Required:  username/passowrd
-	log.Printf("\n===================================")
-	log.Print("***  HACK 3.0 starting...")
-	log.Print("*** #3.1 init empty GET client/Req...")
+	mylogger.Info.Printf("\n===================================")
+	mylogger.Info.Print("Test #3.0 starting...")
+	mylogger.Info.Print("#3.1 init empty POST client/Req...")
 
 	client2 := http.Client{}
 	//request2, err := http.NewRequest("POST", "https://ois-orinda-ca.schoolloop.com/portal/login", nil)
 	request2, err := http.NewRequest("POST", "https://ois-orinda-ca.schoolloop.com/portal/login?etarget=login_form", nil)
+	mylogger.Info.Println("#3.1.1 manual POST orig URL:", request2.URL)
 	request2.SetBasicAuth(u, p)
-
-	resp2, err := client2.Do(request2) //POST
-	mylogger.Info.Printf("*** #3.2 do manual POST - using URL: %s", resp2.Request.URL)
-	mylogger.Info.Println("*** #3.3 do manual POST - Status...", resp2.Status)
+	mylogger.Info.Printf("#3.1.1 : username / password: %s / %s", u, p)
+	resp2, err := client2.Do(request2) //do the POST
+	if Globaldbug == true {
+		mylogger.Info.Println("#3.2 manual POST response URL:", resp2.Request.URL)
+		mylogger.Info.Println("#3.3 manual POST status:", resp2.Status)
+	}
 	if err != nil {
 		log.Fatal(err)
 	} else {
-		mylogger.Info.Println("*** #3.4 do manual POST ERR Status resp2/req2 ...", err)
+		if Globaldbug == true {
+			mylogger.Info.Println("#3.4 manual POST ERR status:", err)
+		}
 	}
 	/* Get Details */
-	mylogger.Info.Println("*** #3.5 craft new URL after manual POST for req2 ...")
+	mylogger.Info.Println("#3.5 craft new URL after manual POST ...")
 	request2.URL, err = url.Parse("https://ois-orinda-ca.schoolloop.com/portal/parent_home")
 	if err != nil {
-		fmt.Printf("*** #3.6 URL Parse #FAIL Error : %s", err)
+		mylogger.Info.Print("#3.6 URL Parse #FAIL Error:", err)
 	} else {
-		mylogger.Info.Println("*** #3.7 2nd URL updated to: ", request2.URL)
+		if Globaldbug == true {
+			mylogger.Info.Println("#3.7 2nd URL updated to:", request2.URL)
+		}
 	}
 
-	mylogger.Info.Println("*** #3.8 set auth creds for 2nd POST for req2 ...") //#bug this now needs to be a GET!!
-	request2.SetBasicAuth("badusername", "badpassword")
-	resp2, err = client2.Do(request2)
-	mylogger.Info.Printf("*** #3.9 2nd GET resp2 from orig POST URL: %s", resp2.Request.URL)
-	mylogger.Info.Println("*** #3.10 resp2 2nd GET Status...", resp2.Status)
+	mylogger.Info.Println("#3.8 set auth creds for 2nd POST for req2 ...") //#bug this now needs to be a GET!!
+	request2.SetBasicAuth(u, p)
+	mylogger.Info.Printf("#3.8.1 : username / password: %s / %s", u, p)
+	resp3, err := client2.Do(request2) // using orignal req/POST structure as setup/executed earlier
+	mylogger.Info.Println("#3.9 2nd GET resp using orig POST request struct:", resp3.Request.URL)
+	mylogger.Info.Println("#3.10 2nd GET Status:", resp3.Status)
 	if err != nil {
 		fmt.Printf("Error : %s", err)
 	} else {
-		mylogger.Info.Println("*** #3.11 2nd new GET from orig POST - ERR Status resp2/req2 ...", err)
+		if Globaldbug == true {
+			mylogger.Info.Println("#3.11 2nd GET - ERR Status:", err)
+		}
 	}
 	defer resp2.Body.Close()
 
 	// 2nd half...
 
-	fmt.Println("*** #3.9 Resp2 Header values")
+	fmt.Println("#3.12 Dump Resp2 Header values")
 	i := 1
-	for key, value := range resp2.Header {
+	for key, value := range resp3.Header {
 		fmt.Println(i, "-", key, ":", value)
 		i++
 	}
 
-	log.Print(" #3.10 Resp2 Cookies...")
-	for ckey, cookie := range resp2.Cookies() {
+	mylogger.Info.Print("#3.13 Resp3 Cookies...")
+	for ckey, cookie := range resp3.Cookies() {
 		fmt.Println(ckey, ":", "Cookie:", cookie.Name, " ", cookie.Value)
 	}
-	log.Print("*** #3.11 JSON decode resp2.body...")
+	mylogger.Info.Print("#3.14 JSON decode resp2.body...")
 	var result map[string]interface{}
-	json.NewDecoder(resp2.Body).Decode(&result)
+	json.NewDecoder(resp3.Body).Decode(&result)
 	log.Println(result)
 
 }
@@ -185,30 +204,30 @@ func hack3(u string, p string) {
 func hack4() {
 	// no username/password used here. Just a GET happening...
 	log.Printf("\n===================================")
-	log.Print("*** HACK #4 starting...")
-	log.Print("*** #4.0 init empty GET client/Req...")
+	log.Print("Test #4 starting...")
+	log.Print("#4.0 init empty manual NewRequest basic GET client/Req...")
 	client4 := http.Client{}
 	request1, err := http.NewRequest("GET", "https://ois-orinda-ca.schoolloop.com/portal/parent_home", nil)
 	resp1, err := client4.Do(request1)
-	mylogger.Info.Printf("*** #4.1 manual resp1 POST URL: %s", resp1.Request.URL)
-	mylogger.Info.Println("*** #4.2 resp1 POST Status...", resp1.Status)
 	if err != nil {
 		log.Fatal(err)
 	} else {
-		mylogger.Info.Println("*** #4.3 client.do resp1/req1 ERR Status...", err)
+		mylogger.Info.Println("#4.3 client.do resp1/req1 ERR Status...", err)
 	}
 	defer resp1.Body.Close()
 
-	mylogger.Info.Printf("*** #4.4 manual request GET URL: %s", resp1.Request.URL)
-	mylogger.Info.Println("*** #4.5 GET Status...", resp1.Status)
-	mylogger.Info.Println("*** #4.6 request GET postform data: ", request1.PostForm)
-
-}
+	if Globaldbug == true {
+		mylogger.Info.Println("#4.1 GET orignal URL:", request1.URL)
+		mylogger.Info.Println("#4.1 GET response URL:", resp1.Request.URL)
+		mylogger.Info.Println("#4.2 GET response Status:", resp1.Status)
+		mylogger.Info.Println("#4.3 GET postform data:", request1.PostForm)
+	} // debug
+} // hack4()
 
 func main() {
 	myastate := 99
 	myValue := &myastate
-	myptr := myValue
+	//myptr := myValue
 
 	mylogger.Init(ioutil.Discard, os.Stdout, os.Stdout, os.Stderr)
 	mylogger.Info.Println("*** In main()")
@@ -223,11 +242,17 @@ func main() {
 	//flag.StringVar(&svar, "svar", "bar", "SVAR a string var")
 	flag.Parse()
 
+	fmt.Println(">>>>> Debug status:", Globaldbug)
+	Globaldbug = *debugPtr
+	fmt.Println(">>>>> Debug status:", Globaldbug)
+
+	//Globaldbug := InitDebug(*debugPtr)
+
 	log.Printf("\n===================================")
 	log.Print("*** #0.1 CMD Line args[]...")
 	fmt.Println("Username:", *usernamePtr)
 	fmt.Println("Password:", *passwordPtr)
-	fmt.Println("Debug status:", *debugPtr)
+	fmt.Println("Debug status:", Globaldbug)
 	fmt.Println("Args - raw string passed:", os.Args[1:])
 	fmt.Println("tail:", flag.Args())
 	// t1 := *usernamePtr
@@ -262,12 +287,11 @@ func main() {
 			log.Printf("Argv %x looks bad (no password): %s...", x, argvloop)
 			*myValue = 4 // bad argv state
 		default: // good-ish
-			log.Printf("In DEFAULT: %v...", x)
+			log.Printf("In DEFAULT loop: %v/%v...", x, *myValue)
 			if x == 1 { // only go inside if for-loop has completed
 				if *myValue == 99 { // clean argv state
-					log.Printf("In DEFAULT & everything is good...")
 					// exec code here...
-					log.Printf("state ptr: %v state value: %v - username/password credentials provided. Executing...", *myptr, myastate)
+					log.Printf("All credentials provided. Executing...")
 					hack1(*usernamePtr, *passwordPtr)
 					hack2()
 					hack3(*usernamePtr, *passwordPtr)
