@@ -10,7 +10,6 @@ import (
 	"net/url"
 	"os"
 
-	"github.com/orville-wright/EPLHackTen/eplstuff"
 	"github.com/orville-wright/EPLHackTen/mylogger"
 )
 
@@ -57,9 +56,9 @@ func hack1(u string, p string) {
 	//resp4, err := http.Post(loginURL, "text/html", urlData)
 	if Globaldbug == true {
 		mylogger.Info.Println("#1.4 POSTform URL:", resp4.Request.URL)
-		mylogger.Info.Println("#1.4 POSTform URLdata:", urlData)
+		mylogger.Info.Println("#1.4.1 POSTform URLdata:", urlData)
 		mylogger.Info.Println("#1.5 POSTform status:", resp4.Status)
-		mylogger.Info.Println("#1.5 POSTform data:", resp4.Request.Form)
+		mylogger.Info.Println("#1.5.1 POSTform data:", resp4.Request.Form)
 	}
 
 	if err != nil {
@@ -180,23 +179,24 @@ func hack3(u string, p string) {
 	defer resp2.Body.Close()
 
 	// 2nd half...
+	if Globaldbug == true {
+		mylogger.Info.Println("#3.12 Dump Resp2 Header values")
+		i := 1
+		for key, value := range resp3.Header {
+			fmt.Println(i, "-", key, ":", value)
+			i++
+		}
 
-	fmt.Println("#3.12 Dump Resp2 Header values")
-	i := 1
-	for key, value := range resp3.Header {
-		fmt.Println(i, "-", key, ":", value)
-		i++
+		mylogger.Info.Print("#3.13 Resp3 Cookies...")
+		for ckey, cookie := range resp3.Cookies() {
+			fmt.Println(ckey, ":", "Cookie:", cookie.Name, " ", cookie.Value)
+		}
+
+		mylogger.Info.Printf("\n#3.14 JSON decode resp2.body...")
+		var result map[string]interface{}
+		json.NewDecoder(resp3.Body).Decode(&result)
+		log.Println(result)
 	}
-
-	mylogger.Info.Print("#3.13 Resp3 Cookies...")
-	for ckey, cookie := range resp3.Cookies() {
-		fmt.Println(ckey, ":", "Cookie:", cookie.Name, " ", cookie.Value)
-	}
-	mylogger.Info.Print("#3.14 JSON decode resp2.body...")
-	var result map[string]interface{}
-	json.NewDecoder(resp3.Body).Decode(&result)
-	log.Println(result)
-
 }
 
 // end hack3
@@ -242,21 +242,18 @@ func main() {
 	//flag.StringVar(&svar, "svar", "bar", "SVAR a string var")
 	flag.Parse()
 
-	fmt.Println(">>>>> Debug status:", Globaldbug)
 	Globaldbug = *debugPtr
-	fmt.Println(">>>>> Debug status:", Globaldbug)
-
 	//Globaldbug := InitDebug(*debugPtr)
 
 	log.Printf("\n===================================")
-	log.Print("*** #0.1 CMD Line args[]...")
-	fmt.Println("Username:", *usernamePtr)
-	fmt.Println("Password:", *passwordPtr)
-	fmt.Println("Debug status:", Globaldbug)
-	fmt.Println("Args - raw string passed:", os.Args[1:])
-	fmt.Println("tail:", flag.Args())
-	// t1 := *usernamePtr
-	// t2 := *passwordPtr
+	if Globaldbug == true {
+		log.Print("cmdline args[]...")
+		fmt.Println("Username:", *usernamePtr)
+		fmt.Println("Password:", *passwordPtr)
+		fmt.Println("Debug status:", Globaldbug)
+		fmt.Println("Args raw string:", os.Args[1:])
+		fmt.Println("cmdline tail:", flag.Args())
+	}
 
 	var argvarray [2]string
 	argvarray[0] = *usernamePtr
@@ -278,16 +275,24 @@ func main() {
 		log.Printf("Looping: %v arg: %s", x, argvarray[x])
 		switch argvloop {
 		case "", " ":
-			log.Printf("Argv %x looks bad (space or empty string): %s...", x, argvloop)
+			if Globaldbug == true {
+				log.Printf("Argv %x looks bad (space or empty string): %s...", x, argvloop)
+			}
 			*myValue = 2 // bad argv state
 		case "no_username":
-			log.Printf("Argv %x looks bad (no username): %s...", x, argvloop)
+			if Globaldbug == true {
+				log.Printf("Argv %x looks bad (no username): %s...", x, argvloop)
+			}
 			*myValue = 3 // bad argv state
 		case "no_password":
-			log.Printf("Argv %x looks bad (no password): %s...", x, argvloop)
+			if Globaldbug == true {
+				log.Printf("Argv %x looks bad (no password): %s...", x, argvloop)
+			}
 			*myValue = 4 // bad argv state
 		default: // good-ish
-			log.Printf("In DEFAULT loop: %v/%v...", x, *myValue)
+			if Globaldbug == true {
+				log.Printf("In DEFAULT loop: %v/%v...", x, *myValue)
+			}
 			if x == 1 { // only go inside if for-loop has completed
 				if *myValue == 99 { // clean argv state
 					// exec code here...
@@ -296,17 +301,19 @@ func main() {
 					hack2()
 					hack3(*usernamePtr, *passwordPtr)
 					hack4()
-					eplstuff.Hack10(*usernamePtr, *passwordPtr)
-					eplstuff.Hack20()
-					eplstuff.Hack30(*usernamePtr, *passwordPtr)
-					eplstuff.Hack40()
+					//eplstuff.Hack10(*usernamePtr, *passwordPtr)
+					//eplstuff.Hack20()
+					//eplstuff.Hack30(*usernamePtr, *passwordPtr)
+					//eplstuff.Hack40()
 				} else {
-					log.Print("One of the Args was bad. NOT execing...")
+					log.Print("One of the cmdline Args was bad. NOT execing...")
 				}
 			} else {
-				log.Print("In DEFAULT but not finished looping yet...")
+				if Globaldbug == true {
+					log.Print("In DEFAULT but not finished looping yet...")
+				}
 			}
-		} // switch tests
+		} // main switch
 	} // outer FOR loop of switch tests
 } // end main()
 
