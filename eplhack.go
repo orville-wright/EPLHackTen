@@ -38,8 +38,8 @@ func processElement(index int, element *goquery.Selection) {
 
 func hack1(u string, p string) {
 	// hack1 basic http.POSTform with credentials passed in body
-	mylogger.Info.Printf("\n============== 1.0 =====================")
-	mylogger.Info.Println("starting basic http.PostForm...")
+	mylogger.Info.Printf("\n================ 1.0 ===================")
+	mylogger.Info.Println("basic http.PostForm...")
 	loginName := u //username
 	password := p  //password
 	loginURL := "https://ois-orinda-ca.schoolloop.com/portal/login?etarget=login_form"
@@ -55,7 +55,8 @@ func hack1(u string, p string) {
 	resp4, err := http.PostForm(loginURL, urlData)
 	//resp4, err := http.Post(loginURL, "text/html", urlData)
 	if Globaldbug == true {
-		mylogger.Info.Println("#1.4 POSTform URL:", resp4.Request.URL)
+		mylogger.Info.Printf("\n==== #1.3.1 POSTform data ====")
+		mylogger.Info.Println("#1.4 POSTform request URL:", resp4.Request.URL)
 		mylogger.Info.Println("#1.4.1 POSTform URLdata:", urlData)
 		mylogger.Info.Println("#1.5 POSTform status:", resp4.Status)
 		mylogger.Info.Println("#1.5.1 POSTform data:", resp4.Request.Form)
@@ -73,7 +74,7 @@ func hack1(u string, p string) {
 	//fmt.Println("Header: ", resp4.Header)
 	//fmt.Println("Body: ", resp4.Body)
 	if Globaldbug == true {
-		mylogger.Info.Println("#1.8 Resp Header values")
+		mylogger.Info.Printf("\n==== #1.8 resp headers ====")
 		i := 1
 		// cycle through header data fields
 		for key, value := range resp4.Header {
@@ -89,23 +90,20 @@ func hack1(u string, p string) {
 			i++
 		} // for :: main key,value loop
 	} // test :: Globaldbug
+
 	defer resp4.Body.Close()
 } // end func decl
 
-// end hack1
-
 func hack2() {
 	// no username/password required. Just a GET request going on here...
-	mylogger.Info.Printf("\n============== 2.0 =====================")
-	mylogger.Info.Println("Test #2 starting...")
-
-	mylogger.Info.Println("#2.0 init basic vanilla GET client/Req...")
+	mylogger.Info.Printf("\n=============== 2 .0 ====================")
+	mylogger.Info.Println("init basic vanilla GET client/Req...")
 	resp0, _ := http.Get("https://ois-orinda-ca.schoolloop.com/")
 	mylogger.Info.Println("#2.1 Basic GET respponse URL: ", resp0.Request.URL)
 	mylogger.Info.Println("#2.2 Basic GET Status:", resp0.Status)
 	//Info.Println("*** XXX HACK #2 GET Headers...", resp0.Header)
 	if Globaldbug == true {
-		fmt.Println("#2.3 Resp Header values")
+		mylogger.Info.Println("#2.3 Resp Header values")
 		i := 1
 		for key, value := range resp0.Header {
 			fmt.Println(i, "-", key, ":", value)
@@ -134,19 +132,28 @@ func hack2() {
 func hack3(u string, p string) {
 	// Required:  username/passowrd
 	mylogger.Info.Printf("\n============== 3.0 =====================")
-	mylogger.Info.Print("Test #3.0 starting...")
-	mylogger.Info.Print("#3.1 init empty POST client/Req...")
+	mylogger.Info.Print("#3.1 init manual empty POST client/Req...")
 
-	client2 := http.Client{}
+	client2 := &http.Client{}
 	//request2, err := http.NewRequest("POST", "https://ois-orinda-ca.schoolloop.com/portal/login", nil)
 	request2, err := http.NewRequest("POST", "https://ois-orinda-ca.schoolloop.com/portal/login?etarget=login_form", nil)
-	mylogger.Info.Println("#3.1.1 manual POST orig URL:", request2.URL)
+	fmt.Println("#3.1.0 manual POST orig URL:", request2.URL)
+	// healthy setup
 	request2.SetBasicAuth(u, p)
-	mylogger.Info.Printf("#3.1.1 : username / password: %s / %s", u, p)
+	request2.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.119 Safari/537.36")
+
+	fmt.Printf("#3.1.1 : username / password: %s / %s\n", u, p)
 	resp2, err := client2.Do(request2) //do the POST
 	if Globaldbug == true {
-		mylogger.Info.Println("#3.2 manual POST response URL:", resp2.Request.URL)
-		mylogger.Info.Println("#3.3 manual POST status:", resp2.Status)
+		fmt.Println("#3.2 manual POST response URL:", resp2.Request.URL)
+		fmt.Println("#3.3 manual POST status:", resp2.Status)
+		fmt.Println("#3.3.1 manual POST orig req headers...")
+		i := 0
+		for key, value := range resp2.Request.Header {
+			fmt.Println(i, "-", key, ":", value)
+			i++
+		}
+		//
 	}
 	if err != nil {
 		log.Fatal(err)
@@ -155,50 +162,76 @@ func hack3(u string, p string) {
 			mylogger.Info.Println("#3.4 manual POST ERR status:", err)
 		}
 	}
-	/* Get Details */
-	mylogger.Info.Println("#3.5 craft new URL after manual POST ...")
+
+	// debug dump data of initial login
+	if Globaldbug == true {
+		mylogger.Info.Printf("\n==== Data dump ====\n")
+		fmt.Println("#3.4.1 Dump 1st req/resp Header values")
+		i := 1
+		for key, value := range resp2.Header {
+			fmt.Println(i, "-", key, ":", value)
+			i++
+		}
+
+		mylogger.Info.Printf("\n==== Data dump ====")
+		fmt.Println("#3.4.2 1st req/resp Cookies...")
+		for ckey, cookie := range resp2.Cookies() {
+			fmt.Println(ckey, ":", "Cookie:", cookie.Name, " ", cookie.Value)
+		}
+
+		mylogger.Info.Printf("\n==== Data dump ====")
+		fmt.Printf("\n#3.4.3 JSON decode 1st req/resp.body...")
+		var result map[string]interface{}
+		json.NewDecoder(resp2.Body).Decode(&result)
+		fmt.Println(result)
+	}
+	//
+	// 2nd half of action. assumes credentials post succeeded. So get new URL
+	// Get Details
+	fmt.Printf("\n#3.5 craft new URL after manual POST ...")
 	request2.URL, err = url.Parse("https://ois-orinda-ca.schoolloop.com/portal/parent_home")
 	if err != nil {
 		mylogger.Info.Print("#3.6 URL Parse #FAIL Error:", err)
 	} else {
 		if Globaldbug == true {
-			mylogger.Info.Println("#3.7 2nd URL updated to:", request2.URL)
+			fmt.Println("#3.7 2nd URL updated to:", request2.URL)
 		}
 	}
 
-	mylogger.Info.Println("#3.8 set auth creds for 2nd POST for req2 ...") //#bug this now needs to be a GET!!
+	fmt.Println("#3.8 set auth creds for 2nd POST for req2 ...") //#bug this now needs to be a GET!!
 	request2.SetBasicAuth(u, p)
-	mylogger.Info.Printf("#3.8.1 : username / password: %s / %s", u, p)
+	fmt.Printf("#3.8.1 : username / password: %s / %s\n", u, p)
 	resp3, err := client2.Do(request2) // using orignal req/POST structure as setup/executed earlier
-	mylogger.Info.Println("#3.9 2nd GET resp using orig POST request struct:", resp3.Request.URL)
-	mylogger.Info.Println("#3.10 2nd GET Status:", resp3.Status)
+	fmt.Println("#3.9 2nd GET resp using orig POST request struct:", resp3.Request.URL)
+	fmt.Println("#3.10 2nd GET Status:", resp3.Status)
 	if err != nil {
-		fmt.Printf("Error : %s", err)
+		mylogger.Info.Printf("Error : %s", err)
 	} else {
 		if Globaldbug == true {
-			mylogger.Info.Println("#3.11 2nd GET - ERR Status:", err)
+			fmt.Println("#3.11 2nd GET - ERR Status:", err)
 		}
 	}
 	defer resp2.Body.Close()
 
 	// 2nd half...
 	if Globaldbug == true {
-		mylogger.Info.Println("#3.12 Dump Resp2 Header values")
+		mylogger.Info.Printf("\n==== Data dump ====")
+		fmt.Println("#3.12 Dump 2nd req/resp Header values")
 		i := 1
 		for key, value := range resp3.Header {
 			fmt.Println(i, "-", key, ":", value)
 			i++
 		}
-
-		mylogger.Info.Print("#3.13 Resp3 Cookies...")
+		mylogger.Info.Printf("\n==== Data dump ====")
+		fmt.Print("#3.13 2nd req/reso Cookies...")
 		for ckey, cookie := range resp3.Cookies() {
 			fmt.Printf("%v : cookie: %v name: %v\n", ckey, cookie.Name, cookie.Value)
 		}
 
-		mylogger.Info.Printf("\n#3.14 JSON decode resp2.body...")
+		mylogger.Info.Printf("\n#3.14 JSON decode 2nd req/res.body...")
 		var result map[string]interface{}
 		json.NewDecoder(resp3.Body).Decode(&result)
-		log.Println(result)
+		fmt.Println(result)
 	}
 }
 
