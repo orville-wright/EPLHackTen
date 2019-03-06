@@ -38,8 +38,8 @@ func processElement(index int, element *goquery.Selection) {
 
 func hack1(u string, p string) {
 	// hack1 basic http.POSTform with credentials passed in body
-	mylogger.Info.Printf("\n===================================")
-	mylogger.Info.Println("#1.0 starting basic http.PostForm...")
+	mylogger.Info.Printf("\n============== 1.0 =====================")
+	mylogger.Info.Println("starting basic http.PostForm...")
 	loginName := u //username
 	password := p  //password
 	loginURL := "https://ois-orinda-ca.schoolloop.com/portal/login?etarget=login_form"
@@ -75,25 +75,28 @@ func hack1(u string, p string) {
 	if Globaldbug == true {
 		mylogger.Info.Println("#1.8 Resp Header values")
 		i := 1
+		// cycle through header data fields
 		for key, value := range resp4.Header {
-			fmt.Println(i, "-", key, ":", value)
+			// split out the individual cookies
+			if key == "Set-Cookie" {
+				mylogger.Info.Println("#1.9 Resp Cookies...")
+				for ckey, cookie := range resp4.Cookies() {
+					//for ckey, cookie := range resp4.Request.Cookies() {
+					fmt.Printf("C%v - %v - Cookie: %v\n", ckey, cookie.Name, cookie.Value)
+				} // for :: cookie splitter
+			} // if :: test for cookie section
+			fmt.Printf("H%v - %v - %v\n", i, key, value)
 			i++
-		}
-
-		mylogger.Info.Println("#1.9 Resp Cookies...")
-		for ckey, cookie := range resp4.Cookies() {
-			fmt.Println(ckey, ":", "Cookie:", cookie.Name, " ", cookie.Value)
-		}
-	}
-
+		} // for :: main key,value loop
+	} // test :: Globaldbug
 	defer resp4.Body.Close()
-}
+} // end func decl
 
 // end hack1
 
 func hack2() {
 	// no username/password required. Just a GET request going on here...
-	mylogger.Info.Printf("\n===================================")
+	mylogger.Info.Printf("\n============== 2.0 =====================")
 	mylogger.Info.Println("Test #2 starting...")
 
 	mylogger.Info.Println("#2.0 init basic vanilla GET client/Req...")
@@ -130,7 +133,7 @@ func hack2() {
 
 func hack3(u string, p string) {
 	// Required:  username/passowrd
-	mylogger.Info.Printf("\n===================================")
+	mylogger.Info.Printf("\n============== 3.0 =====================")
 	mylogger.Info.Print("Test #3.0 starting...")
 	mylogger.Info.Print("#3.1 init empty POST client/Req...")
 
@@ -189,7 +192,7 @@ func hack3(u string, p string) {
 
 		mylogger.Info.Print("#3.13 Resp3 Cookies...")
 		for ckey, cookie := range resp3.Cookies() {
-			fmt.Println(ckey, ":", "Cookie:", cookie.Name, " ", cookie.Value)
+			fmt.Printf("%v : cookie: %v name: %v\n", ckey, cookie.Name, cookie.Value)
 		}
 
 		mylogger.Info.Printf("\n#3.14 JSON decode resp2.body...")
@@ -203,7 +206,7 @@ func hack3(u string, p string) {
 
 func hack4() {
 	// no username/password used here. Just a GET happening...
-	log.Printf("\n===================================")
+	log.Printf("\n================ 4.0 ===================")
 	log.Print("Test #4 starting...")
 	log.Print("#4.0 init empty manual NewRequest basic GET client/Req...")
 	client4 := http.Client{}

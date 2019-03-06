@@ -12,6 +12,7 @@ var (
 	Error   *log.Logger
 )
 
+//Init :: loging
 func Init(
 	traceHandle io.Writer,
 	infoHandle io.Writer,
@@ -24,7 +25,7 @@ func Init(
 
 	Info = log.New(infoHandle,
 		"INFO: ",
-		log.Ldate|log.Ltime)
+		log.Ltime)
 
 	Warning = log.New(warningHandle,
 		"WARNING: ",
